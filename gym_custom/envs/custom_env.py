@@ -3,12 +3,15 @@ import gym
 from gym import spaces, logger
 from gym.utils import seeding
 import numpy as np
+from ray.rllib.env.env_context import EnvContext
 
 
 class CustomEnv(gym.Env):
     metadata = {"render.modes": ["human", "rgb_array"], "video.frames_per_second": 50}
 
-    def __init__(self):
+    def __init__(self, config: EnvContext):
+        if config is not None:
+            self.gravity = config["gravity"]
         self.gravity = 9.8
         self.masscart = 1.0
         self.masspole = 0.1
@@ -58,10 +61,10 @@ class CustomEnv(gym.Env):
         # For the interested reader:
         # https://coneural.org/florian/papers/05_cart_pole.pdf
         temp = (
-            force + self.polemass_length * theta_dot ** 2 * sintheta
-        ) / self.total_mass
+                       force + self.polemass_length * theta_dot ** 2 * sintheta
+               ) / self.total_mass
         thetaacc = (self.gravity * sintheta - costheta * temp) / (
-            self.length * (4.0 / 3.0 - self.masspole * costheta ** 2 / self.total_mass)
+                self.length * (4.0 / 3.0 - self.masspole * costheta ** 2 / self.total_mass)
         )
         xacc = temp - self.polemass_length * thetaacc * costheta / self.total_mass
 
